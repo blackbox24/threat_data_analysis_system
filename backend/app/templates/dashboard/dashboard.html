@@ -49,9 +49,21 @@
         /* Show the dropdown menu on hover */
         .dropdown:hover .dropdown-content {display: block;}
 
-/* Change the background color of the dropdown button when the dropdown content is shown */
-        .dashboard{
-            display: flex;
+        /* Change the background color of the dropdown button when the dropdown content is shown */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 30px;
+        }
+        .container {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        canvas {
+            width: 100% !important;
+            height: 400px !important;
         }
 
     </style>
@@ -70,25 +82,19 @@
         <a href="{% url 'incident_list' %}">Incident List</a>
         <a href="{% url 'logout' %}" class="logout">Logout</a>
     </nav>
-    <div class="">
-        <h1>Dashboard</h1>
-        <div class="container" style="width: 50%;"></div>
+    <div class="dashboard">
+        <div class="container">
             <canvas id="cpu-chart"></canvas>
+        </div>
+        <div class="container">
             <canvas id="gpu-chart"></canvas>
         </div>
-        <div class="container" style="width: 50%;">
-            
+        <div class="container">
             <canvas id="system-health-chart"></canvas>
         </div>
-        
         <div class="container">
-            <!-- <canvas id="threat-chart"></canvas> -->
             <canvas id="threat-chart1"></canvas>
-            
-        
-            <!-- <canvas id="candlestick-chart"></canvas> -->
         </div>
-        
     </div>
     <script>
         // Static data for demonstration
@@ -329,8 +335,8 @@
                     .then(data => {
                         const cpuData = data.cpu;
                         const gpuData = data.cpu;
-                        // console.log(cpuData)
-                        console.log(cpuData.cpu_percent)
+                        
+                        
                         // Update CPU Chart
                         cpuChart.data.labels.push(new Date().toLocaleTimeString());
                         cpuChart.data.datasets[0].data.push(cpuData.cpu_percent);
