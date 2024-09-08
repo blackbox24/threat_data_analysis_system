@@ -1,0 +1,350 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
+    <style>
+    .dropbtn {
+        color: white;
+        padding: 16px;
+        font-size: 16px;
+        border: none;
+        }
+
+        /* The container <div> - needed to position the dropdown content */
+        .dropdown {
+        position: relative;
+        display: inline-block;
+        }
+
+        /* Dropdown Content (Hidden by Default) */
+        .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        }
+
+        /* Change color of dropdown links on hover */
+        .dropdown-content a:hover {background-color: #ddd;}
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {display: block;}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+        .dashboard{
+            display: flex;
+        }
+
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <div class="dropdown">
+            <a href="#" class="dropbtn">Reports</a>
+            <div class="dropdown-content">
+                <a href="{% url 'incident_report' %}">Incident</a>
+                <a href="{% url 'threat_report_add' %}">Threat</a>
+            </div>
+        </div>
+        <a href="{% url 'threat_report' %}">Threat Report</a>
+        <a href="{% url 'incident_list' %}">Incident List</a>
+        <a href="{% url 'logout' %}" class="logout">Logout</a>
+    </nav>
+    <div class="">
+        <h1>Dashboard</h1>
+        <div class="container" style="width: 50%;"></div>
+            <canvas id="cpu-chart"></canvas>
+            <canvas id="gpu-chart"></canvas>
+        </div>
+        <div class="container" style="width: 50%;">
+            
+            <canvas id="system-health-chart"></canvas>
+        </div>
+        
+        <div class="container">
+            <!-- <canvas id="threat-chart"></canvas> -->
+            <canvas id="threat-chart1"></canvas>
+            
+        
+            <!-- <canvas id="candlestick-chart"></canvas> -->
+        </div>
+        
+    </div>
+    <script>
+        // Static data for demonstration
+        
+        const threatData = {
+            labels: ['Low', 'Medium', 'High', 'Critical'],
+            data: [10, 20, 30, 40]
+        };
+
+        const threatData2 = {
+            labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday',"Friday"],
+            data: [0, 30, 10, 40]
+        }
+        const systemHealthDistribution = {
+            labels: ['Healthy', 'Warning', 'Critical'],
+            data: [60, 25, 15]
+        };
+
+        const IncidenthDistribution = {
+            labels: ['High', 'Low', 'Medium'],
+            data: [60, 25, 15]
+        };
+        // Threat Chart
+        // System Health Chart
+        // const ctxSystemHealth1 = document.getElementById('system-health-chart1').getContext('2d');
+        // new Chart(ctxSystemHealth1, {
+        //     type: 'pie',
+        //     data: {
+        //         labels: IncidenthDistribution.labels,
+        //         datasets: [{
+        //             label: 'Incident Report Distribution',
+        //             data: IncidenthDistribution.data,
+        //             backgroundColor: [
+        //         'rgba(255, 0, 0, 0.2)', // Red
+        //         'rgba(0, 0, 255, 0.2)', // Blue
+        //         'rgba(0, 255, 0, 0.2)'  // Green
+        //     ],
+        //     borderColor: [
+        //         'rgba(255, 0, 0, 1)', // Red
+        //         'rgba(0, 0, 255, 1)', // Blue
+        //         'rgba(0, 255, 0, 1)'  // Green
+        //     ],
+        //             borderWidth: 5,
+        //         }]
+        //     },
+        //     options: {
+        //         responsive: true,
+        //         plugins: {
+        //             title: {
+        //                 display: true,
+        //                 text: 'Threat Level'
+        //             }
+        //         },
+                
+        //     }
+        // });
+        
+        // const ctxThreat = document.getElementById('threat-chart').getContext('2d');
+        // new Chart(ctxThreat, {
+        //     type: 'line',
+        //     data: {
+        //         labels: threatData2.labels,
+        //         datasets: [{
+        //             label: 'Threat Levels',
+        //             data: threatData2.data,
+        //             backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        //             borderColor: 'rgba(255, 99, 132, 1)',
+        //             borderWidth: 1
+        //         }]
+        //     },
+        //     options: {
+        //         plugins: {
+        //             title: {
+        //                 display: true,
+        //                 text: 'Candlestick Chart Example'
+        //             }
+        //         },
+        //         scales: {
+        //             y: {
+        //                 beginAtZero: true
+        //             }
+        //         }
+        //     }
+        // });
+
+        // // System Health Chart
+        const ctxSystemHealth = document.getElementById('system-health-chart').getContext('2d');
+        new Chart(ctxSystemHealth, {
+            type: 'doughnut',
+            data: {
+                labels: systemHealthDistribution.labels,
+                datasets: [{
+                    label: 'System Health Distribution',
+                    data: systemHealthDistribution.data,
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                        ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'System Health'
+                    },
+                    datalabels: {
+                        color: '#000',
+                        anchor: 'end',
+                        align: 'start',
+                        formatter: (value, context) => {
+                            return value;
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        const ctxThreat1 = document.getElementById('threat-chart1').getContext('2d');
+        new Chart(ctxThreat1, {
+            type: 'bar',
+            data: {
+                labels: threatData.labels,
+                datasets: [{
+                    label: 'Threat Levels',
+                    data: threatData.data,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Candlestick Chart Example'
+                    }
+                },
+            }
+        });
+
+        // const ctxCandlestick = document.getElementById('candlestick-chart').getContext('2d');
+        // new Chart(ctxCandlestick, {
+        //     type: 'candlestick',
+        //     data: {
+        //         datasets: [{
+        //             label: 'Candlestick Data',
+        //             data: [
+        //                 { t: new Date('2023-01-01'), o: 100, h: 110, l: 90, c: 105 },
+        //                 { t: new Date('2023-01-02'), o: 105, h: 115, l: 95, c: 100 },
+        //                 { t: new Date('2023-01-03'), o: 100, h: 120, l: 80, c: 110 },
+        //                 { t: new Date('2023-01-04'), o: 110, h: 130, l: 100, c: 120 },
+        //                 { t: new Date('2023-01-05'), o: 120, h: 140, l: 110, c: 130 }
+        //             ],
+        //             backgroundColor: 'rgba(0, 0, 0, 0.1)',
+        //             borderColor: 'rgba(0, 0, 0, 1)',
+        //             borderWidth: 1
+        //         }]
+        //     },
+        //     options: {
+        //         scales: {
+        //             x: {
+        //                 type: 'time',
+        //                 time: {
+        //                     unit: 'day'
+        //                 }
+        //             },
+        //             y: {
+        //                 beginAtZero: false
+        //             }
+        //         }
+        //     }
+        // });
+        document.addEventListener('DOMContentLoaded', function() {
+            const cpuCtx = document.getElementById('cpu-chart').getContext('2d');
+            const gpuCtx = document.getElementById('gpu-chart').getContext('2d');
+
+            const cpuChart = new Chart(cpuCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'CPU Load (%)',
+                        data: [],
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            const gpuChart = new Chart(gpuCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'GPU Load (%)',
+                        data: [],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            function updateCharts() {
+                fetch('/system_data_api/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const cpuData = data.cpu;
+                        const gpuData = data.cpu;
+                        // console.log(cpuData)
+                        console.log(cpuData.cpu_percent)
+                        // Update CPU Chart
+                        cpuChart.data.labels.push(new Date().toLocaleTimeString());
+                        cpuChart.data.datasets[0].data.push(cpuData.cpu_percent);
+                        cpuChart.update();
+
+                        // Update GPU Chart
+                        gpuChart.data.labels.push(new Date().toLocaleTimeString());
+                        gpuChart.data.datasets[0].data.push(cpuData.cpu_percent);
+                        gpuChart.update();
+                    });
+            }
+
+            setInterval(updateCharts, 1000); // Update every 5 seconds
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="cpu-chart" width="400" height="400"></canvas>
+    <canvas id="gpu-chart" width="400" height="400"></canvas>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cpuCtx = document.getElementById('cpu-chart').getContext('2d');
+            const gpuCtx = document.getElementById('gpu-chart').getContext('2d');
+
+            const cpuChart = new Chart(cpuCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'CPU Load (%)',
+                        data: [],
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            const gpuChart = new Chart(gpuCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'GPU Load (%)',
+                        data: [],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            function updateCharts() {
+                fetch('/system_data_api/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const cpuData = data.cpu;
+                        const gpuData = data.gpu;
+                        // console.log(cpuData)
+                        console.log(cpuData.cpu_percent)
+                        // Update CPU Chart
+                        cpuChart.data.labels.push(new Date().toLocaleTimeString());
+                        cpuChart.data.datasets[0].data.push(cpuData.cpu_percent);
+                        cpuChart.update();
+
+                        // Update GPU Chart
+                        gpuChart.data.labels = gpuData.map(gpu => gpu.name);
+                        gpuChart.data.datasets[0].data = gpuData.map(gpu => gpu.load);
+                        gpuChart.update();
+                    });
+            }
+
+            setInterval(updateCharts, 1000); // Update every 5 seconds
+        });
+    </script>
+</body>
+</html>

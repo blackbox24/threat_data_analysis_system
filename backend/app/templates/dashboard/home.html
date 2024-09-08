@@ -1,0 +1,141 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Security Incident</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        
+        .container {
+            width: 60%;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group select {
+            cursor: pointer;
+        }
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 1em;
+            color: #fff;
+            text-align: center;
+        }
+        .alert-success {
+            background-color: #28a745;
+        }
+        .alert-error {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+
+    
+    {% if user.role == 'admin' %}
+    <body>
+        <nav>
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+            <a href="{% url 'incident_report' %}">Report Incident</a>
+            <a href="{% url 'threat_report' %}">Threat Report</a>
+            <a href="{% url 'incident_list' %}">Incident List</a>
+            <a href="{% url 'logout' %}" class="logout">Logout</a>
+        </nav>
+        <div class="container">
+            <h1>Welcome, {{ user.username }}!</h1>
+        </div>
+    </body>
+    {% else %}
+    <div class="container">
+        <h1>Welcome, {{ user.username }}!</h1>
+        <button class="btn-submit" style="background-color: #dc3545;"><a href="{% url 'logout' %}" style="text-decoration: none; color: #fff;" class="logout">Logout</a></button>
+        
+    </div>
+    <div class="container">
+        
+        <h1>Report Security Incident</h1>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <form method="POST" action="{% url 'submit_incident' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="incident_type">Incident Type:</label>
+                <select id="incident_type" name="incident_type" required>
+                    <option value="Malware">Malware</option>
+                    <option value="Phishing">Phishing</option>
+                    <option value="Unauthorized Access">Unauthorized Access</option>
+                    <option value="DDoS Attack">DDoS Attack</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="date_occurred">Date Occurred:</label>
+                <input type="datetime-local" id="date_occurred" name="date_occurred" required>
+            </div>
+            <div class="form-group">
+                <label for="severity">Severity:</label>
+                <select id="severity" name="severity" required>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-submit">Submit Report</button>
+        </form>
+    </div>
+</body>
+</html>
+    {% endif %}
+{% load static %}
+
+</html>
+
